@@ -119,12 +119,12 @@ int main(int argc, char * argv[]) {
     //Get the local IP address and port of player
     struct sockaddr_in * addr = (struct sockaddr_in *)&socket_addr;
     player_ip[i] = inet_ntoa(addr->sin_addr);
-    cout << "recv player ip: " << player_ip[i] << endl;
+    //cout << "recv player ip: " << player_ip[i] << endl;
     int port;
     recv(player_socket_fd[i], &port, sizeof(port), 0);
     player_port[i] = port;
   
-    cout << "recv player port number: " << player_port[i] << endl;
+    //cout << "recv player port number: " << player_port[i] << endl;
   }
 
   //send neighbor info to each player
@@ -136,10 +136,7 @@ int main(int argc, char * argv[]) {
     // cout << "master send player ip : " << player_ip[i] << endl;
   } 
 
-
-
-
-  
+  cout << "Ready to start the game, sending potato to player <number>" << endl;
 
 
   return 1;

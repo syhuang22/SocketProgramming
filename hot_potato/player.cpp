@@ -61,7 +61,8 @@ int main(int argc, char * argv[]) {
     //receive id and number of players from ringmaster server
     recv(socket_fd_mc, &id, sizeof(id), 0);
     recv(socket_fd_mc, &num_players, sizeof(num_players), 0);
-    cout << "my id is " << id << ". With num player of: " << num_players <<  endl;
+    cout << "Connected as player " << id << " out of " << num_players
+        << " total players" << endl;
     
     //build a socket, blind, and listen it as player server (PS)
     //initialize getaddrinfo
@@ -134,53 +135,65 @@ int main(int argc, char * argv[]) {
     recv(socket_fd_mc, &neighbor_port, sizeof(neighbor_port), 0);
     recv(socket_fd_mc, neighbor_ip, sizeof(neighbor_ip), MSG_WAITALL);
     neighbor_ip[sizeof(neighbor_ip)-1] = '\0';
-    cout<< "received neighbor's port from master: " << neighbor_port <<endl;
-    cout<< "received neighbor's ip from master: " << neighbor_ip <<endl;
 
     //cast machine name and port number 
     std::string neighbor_port_str = std::to_string(neighbor_port);
-    const char* hostname_pc = neighbor_port_str.c_str();
-    const char * port_num_pc = neighbor_ip;
+    const char * port_num_pc = neighbor_port_str.c_str();
+    const char * hostname_pc = neighbor_ip;
 
-    cout << "hostname: " << hostname_pc << endl;
-    cout << "port number: " << port_num_pc << endl;
+    cout << "neighbor's hostname: " << hostname_pc << endl;
+    cout << "neighbor's port number: " << port_num_pc << endl;
 
     
-    // //create and connect to right player as a client (PC)****************
-    // int status_pc;
-    // int socket_fd_pc;
-    // struct addrinfo host_info_pc;
-    // struct addrinfo *host_info_list_pc;
-    // //const char * port_num_pc = "5555";
+    //create and connect to right player as a client (PC)****************
+    int status_pc;
+    int socket_fd_pc;
+    struct addrinfo host_info_pc;
+    struct addrinfo *host_info_list_pc;
+    //const char * port_num_pc = "5555";
 
-    // memset(&host_info_pc, 0, sizeof(host_info_pc));
-    // host_info_pc.ai_family   = AF_UNSPEC;
-    // host_info_pc.ai_socktype = SOCK_STREAM;
+    memset(&host_info_pc, 0, sizeof(host_info_pc));
+    host_info_pc.ai_family   = AF_UNSPEC;
+    host_info_pc.ai_socktype = SOCK_STREAM;
 
-    // status_pc = getaddrinfo(hostname_pc, port_num_pc, &host_info_pc, &host_info_list_pc);
-    // if (status_pc != 0) {
-    //     cerr << "Error: cannot get address info for host" << endl;
-    //     cerr << "  (" << hostname_pc << "," << port_num_pc << ")" << endl;
-    //     return -1;
-    // } 
+    status_pc = getaddrinfo(hostname_pc, port_num_pc, &host_info_pc, &host_info_list_pc);
+    if (status_pc != 0) {
+        cerr << "Error: cannot get address info for host" << endl;
+        cerr << "  (" << hostname_pc << "," << port_num_pc << ")" << endl;
+        return -1;
+    } 
 
-    // socket_fd_pc = socket(host_info_list_pc->ai_family, 
-	//     host_info_list_pc->ai_socktype, 
-	// 	host_info_list_pc->ai_protocol);
-    // if (socket_fd_pc == -1) {
-    //     cerr << "Error: cannot create socket" << endl;
-    //     cerr << "  (" << hostname_pc << "," << port_num_pc << ")" << endl;
-    //     return -1;
-    // } 
+    // create socket (PC)
+    socket_fd_pc = socket(host_info_list_pc->ai_family, 
+	    host_info_list_pc->ai_socktype, 
+		host_info_list_pc->ai_protocol);
+    if (socket_fd_pc == -1) {
+        cerr << "Error: cannot create socket" << endl;
+        cerr << "  (" << hostname_pc << "," << port_num_pc << ")" << endl;
+        return -1;
+    } 
   
-    // cout << "Connecting to " << hostname_pc << " on port " << port_num_pc << "..." << endl;
-  
-    // status_pc = connect(socket_fd_pc, host_info_list_pc->ai_addr, host_info_list_pc->ai_addrlen);
-    // if (status_pc == -1) {
-    //     cerr << "Error: cannot connect to socket" << endl;
-    //     cerr << "  (" << hostname_pc << "," << port_num_pc << ")" << endl;
-    //     return -1;
-    // } 
+    cout << "Connecting to " << hostname_pc << " on port " << port_num_pc << "..." << endl;
+
+    // connect socket (PC)
+    status_pc = connect(socket_fd_pc, host_info_list_pc->ai_addr, host_info_list_pc->ai_addrlen);
+    if (status_pc == -1) {
+        cerr << "Error: cannot connect to socket" << endl;
+        cerr << "  (" << hostname_pc << "," << port_num_pc << ")" << endl;
+        return -1;
+    } 
+
+    //accept connection as player server (PS)
+    struct sockaddr_storage socket_addr;
+    socklen_t socket_addr_len = sizeof(socket_addr);
+    int socket_fd_client_ps;
+    socket_fd_client_ps = accept(socket_fd_ps, (struct sockaddr *)&socket_addr, &socket_addr_len);
+    if (socket_fd_client_ps == -1) {
+        cerr << "Error: cannot accept connection on socket" << endl;
+        return -1;
+    } 
+
+    cout << "players connection success!"  << endl;
 
     // close(socket_fd_mc);
     return 1;
