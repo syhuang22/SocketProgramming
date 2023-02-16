@@ -2,4 +2,5 @@
 
 struct Potato {
   int hops;
+  std::vector<int> trace;
 };

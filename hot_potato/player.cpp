@@ -1,6 +1,7 @@
 #include <netdb.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <algorithm>
 #include "potato.h"
 #include "helper.hpp"
 
@@ -130,10 +131,11 @@ int main(int argc, char * argv[]) {
 
     //receive neighbor's ip from ringmaster server
     int neighbor_port;
-    char neighbor_ip[50];
-
-    recv(socket_fd_mc, &neighbor_port, sizeof(neighbor_port), 0);
-    recv(socket_fd_mc, neighbor_ip, sizeof(neighbor_ip), MSG_WAITALL);
+    int ip_length;
+    recv(socket_fd_mc, &ip_length, sizeof(int), 0);
+    char neighbor_ip[ip_length];
+    recv(socket_fd_mc, &neighbor_port, sizeof(int), 0);
+    recv(socket_fd_mc, neighbor_ip, ip_length, MSG_WAITALL);
     neighbor_ip[sizeof(neighbor_ip)-1] = '\0';
 
     //cast machine name and port number 
@@ -194,6 +196,34 @@ int main(int argc, char * argv[]) {
     } 
 
     cout << "players connection success!"  << endl;
+    //start playing the game of potato
+    //initialize sockets descriptors set 
+    // fd_set readfds;
+    // FD_ZERO(&readfds);
+    // FD_SET(socket_fd_mc, &readfds); //ringmaster 
+    // FD_SET(socket_fd_pc, &readfds); //player as client (right neightbor)
+    // FD_SET(socket_fd_client_ps, &readfds); //player as server (left neightbor)
+    Potato received_potato;
+    int test = 199;
+    if (recv(socket_fd_mc, &test, sizeof(test), 0) < 0) {
+        cout << "error" <<endl;
+    } else {
+        cout << "success" <<endl;
+    }
+    cout << "Player: " <<id<< "test value: " << test<<endl;
+    // process the game for potato passing 
+    // while (true) {
+    //     int max_fd = max({ socket_fd_mc, socket_fd_pc, socket_fd_client_ps }) + 1; // get the max fd value
+    //     int result = select(max_fd, &readfds, NULL, NULL, NULL); 
+    //     if (FD_ISSET(socket_fd_mc, &readfds)) {
+    //         // Ringmaster socket is ready for reading
+    //         recv(socket_fd_mc, &received_potato, sizeof(received_potato), 0);
+    //         cout << "Player: " <<id<< "I've recieve the potato with hops: " << received_potato.hops<<endl;
+    //         break;
+    //     }
+
+    // }
+
 
     // close(socket_fd_mc);
     return 1;

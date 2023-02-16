@@ -130,14 +130,35 @@ int main(int argc, char * argv[]) {
   //send neighbor info to each player
   for(int i = 0; i < num_players; i++) {
     int neighbor_id = (i + 1) % num_players;
-    send(player_socket_fd[i], &player_port[neighbor_id], sizeof(player_port[neighbor_id]), 0);
+    int ip_length = player_ip[neighbor_id].length() + 1;
+    send(player_socket_fd[i], &ip_length, sizeof(int), 0);
+    send(player_socket_fd[i], &player_port[neighbor_id], sizeof(int), 0);
     send(player_socket_fd[i], player_ip[neighbor_id].c_str(), player_ip[neighbor_id].length() + 1, 0);
-    // cout << "master send player port : " << player_port[i] << endl;
-    // cout << "master send player ip : " << player_ip[i] << endl;
+    cout << "master send player port : " << player_port[i] << endl;
+    cout << "master send player ip : " << player_ip[i] << endl;
   } 
 
-  cout << "Ready to start the game, sending potato to player <number>" << endl;
+  //create potato object
+  Potato potato;
+  potato.hops = num_hops;
+
+  //select a random player to start the game 
+  srand((unsigned int)time(NULL) + num_players);
+  int random_num = rand() % num_players;
+  cout << "Ready to start the game, sending potato to player " << 0 << endl;
+  cout << "hops of potato: " << potato.hops <<endl;
+  int test = 4 ;
+  int bytes_sent = send(player_socket_fd[0], &test, sizeof(test), 0);
+  if (bytes_sent != sizeof(test)) {
+    cout << "error" <<endl;
+    // error occurred
+    // handle the error
+  }
+  cout << "here"<<endl;
 
 
-  return 1;
+
+  while(1){
+    
+  }
 }
