@@ -145,15 +145,9 @@ int main(int argc, char * argv[]) {
   //select a random player to start the game 
   srand((unsigned int)time(NULL) + num_players);
   int random_num = rand() % num_players;
-  cout << "Ready to start the game, sending potato to player " << 0 << endl;
+  cout << "Ready to start the game, sending potato to player: " << random_num << endl;
   cout << "hops of potato: " << potato.hops <<endl;
-  int test = 4 ;
-  int bytes_sent = send(player_socket_fd[0], &test, sizeof(test), 0);
-  if (bytes_sent != sizeof(test)) {
-    cout << "error" <<endl;
-    // error occurred
-    // handle the error
-  }
+  int bytes_sent = send(player_socket_fd[random_num], &potato, sizeof(potato), 0);
   cout << "here"<<endl;
 
 

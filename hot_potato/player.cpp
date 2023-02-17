@@ -139,7 +139,7 @@ int main(int argc, char * argv[]) {
     neighbor_ip[sizeof(neighbor_ip)-1] = '\0';
 
     //cast machine name and port number 
-    std::string neighbor_port_str = std::to_string(neighbor_port);
+    string neighbor_port_str = to_string(neighbor_port);
     const char * port_num_pc = neighbor_port_str.c_str();
     const char * hostname_pc = neighbor_ip;
 
@@ -198,33 +198,80 @@ int main(int argc, char * argv[]) {
     cout << "players connection success!"  << endl;
     //start playing the game of potato
     //initialize sockets descriptors set 
+
     // fd_set readfds;
     // FD_ZERO(&readfds);
     // FD_SET(socket_fd_mc, &readfds); //ringmaster 
     // FD_SET(socket_fd_pc, &readfds); //player as client (right neightbor)
     // FD_SET(socket_fd_client_ps, &readfds); //player as server (left neightbor)
-    Potato received_potato;
-    int test = 199;
-    if (recv(socket_fd_mc, &test, sizeof(test), 0) < 0) {
-        cout << "error" <<endl;
-    } else {
-        cout << "success" <<endl;
-    }
-    cout << "Player: " <<id<< "test value: " << test<<endl;
+    // Potato received_potato;
+
+    // recv(socket_fd_mc, &received_potato, sizeof(received_potato), 0);
+    // cout << "Player: " <<id<< "hop value: " << received_potato.hops<<endl;
     // process the game for potato passing 
-    // while (true) {
-    //     int max_fd = max({ socket_fd_mc, socket_fd_pc, socket_fd_client_ps }) + 1; // get the max fd value
-    //     int result = select(max_fd, &readfds, NULL, NULL, NULL); 
-    //     if (FD_ISSET(socket_fd_mc, &readfds)) {
-    //         // Ringmaster socket is ready for reading
-    //         recv(socket_fd_mc, &received_potato, sizeof(received_potato), 0);
-    //         cout << "Player: " <<id<< "I've recieve the potato with hops: " << received_potato.hops<<endl;
-    //         break;
-    //     }
+    
+    // int test = 5;
+    // send(socket_fd_pc, &test, sizeof(test),0);
+    // int res;
+    // recv(socket_fd_client_ps, &res, sizeof(res),0);
+    // cout<< "neightbor test: " <<res << endl;
+    Potato received_potato;
+    while (true) {
+        fd_set readfds;
+        FD_ZERO(&readfds);
+        FD_SET(socket_fd_mc, &readfds);
+        FD_SET(socket_fd_pc, &readfds);
+        FD_SET(socket_fd_client_ps, &readfds);
 
-    // }
-
-
+        int max_fd = max({ socket_fd_mc, socket_fd_pc, socket_fd_client_ps }) + 1; // get the max fd value
+        int result = select(max_fd, &readfds, NULL, NULL, NULL); 
+        if (result == -1) {
+            perror("select error");
+            exit(1);
+        }
+        if (FD_ISSET(socket_fd_mc, &readfds)) {
+            recv(socket_fd_mc, &received_potato, sizeof(received_potato), 0);
+            cout << "potato from ringmaster" <<endl;
+        } else if (FD_ISSET(socket_fd_pc, &readfds)) {
+            cout << "potato from right neighbor" <<endl;
+            recv(socket_fd_pc, &received_potato, sizeof(received_potato), 0);
+        } else if (FD_ISSET(socket_fd_client_ps, &readfds)) {
+            cout << "potato from left neighbor" <<endl;
+            recv(socket_fd_client_ps, &received_potato, sizeof(received_potato), 0);
+        }
+        cout << "Player: " << id << " I've received the potato with hops: " << received_potato.hops << endl;
+        received_potato.hops--;
+        received_potato.trace[received_potato.index] = id;
+        received_potato.index++;
+        if (received_potato.hops > 0) { // pass to one of the neighbors 
+            // Pass the potato to a neighbor
+            srand((unsigned int)time(NULL) + 2);
+            int random_neighbor = rand() % 2; // randomly select a neighbor
+            cout << "hops left: " << received_potato.hops << endl;
+            cout << "trace: ";
+            for(int i  = 0 ; i < received_potato.index; i++) {
+                cout << received_potato.trace[i] << " ";
+            }
+            cout <<endl;
+            if (random_neighbor == 0) {
+                // Pass the potato to the left neighbor
+                send(socket_fd_client_ps, &received_potato, sizeof(received_potato), 0);
+                cout << "Player: " <<id<< " Passing potato to the left neighbor." << endl;
+            } else {
+                // Pass the potato to the right neighbor
+                send(socket_fd_pc, &received_potato, sizeof(received_potato), 0);
+                cout << "Player: " <<id<< " Passing potato to the right neighbor." << endl;
+            }
+        } else { //pass potato back to ringmaster
+            send(socket_fd_mc, &received_potato, sizeof(received_potato), 0);
+            cout << "Player: " << id << " hops reached zero" << endl;
+            break;
+        }
+    }
+    
     // close(socket_fd_mc);
+    while(1){
+
+    }
     return 1;
 }
