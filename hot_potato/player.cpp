@@ -197,7 +197,7 @@ int main(int argc, char * argv[]) {
         received_potato.hops--;
         received_potato.trace[received_potato.index] = id;
         received_potato.index++;
-        cout << "hops left: " << received_potato.hops << endl;
+        //cout << "hops left: " << received_potato.hops << endl;
         if (received_potato.hops > 0) { // pass to one of the neighbors 
             mt19937 rng(std::random_device{}());
             // randomly select a neighbor
@@ -206,20 +206,20 @@ int main(int argc, char * argv[]) {
             // srand((unsigned int)time(NULL) + 2);
             // int random_neighbor = rand() % 2; 
             if (random_neighbor == 0) {
-                std::lock_guard<std::mutex> guard(output_mutex);
+                //std::lock_guard<std::mutex> guard(output_mutex);
                 // Pass the potato to the left neighbor
                 send(socket_fd_client_ps, &received_potato, sizeof(received_potato), 0);
                 int lef_id = (id + num_players - 1) % num_players;
                 cout << "Sending potato to "<< lef_id << endl;
             } else {
-                std::lock_guard<std::mutex> guard(output_mutex);
+                //std::lock_guard<std::mutex> guard(output_mutex);
                 // Pass the potato to the right neighbor
                 send(socket_fd_pc, &received_potato, sizeof(received_potato), 0);
                 int right_id = (id + 1) % num_players;
                 cout << "Sending potato to "<< right_id << endl;
             }
         } else if (received_potato.hops == 0){ //pass potato back to ringmaster
-            std::lock_guard<std::mutex> guard(output_mutex);
+            //std::lock_guard<std::mutex> guard(output_mutex);
             send(socket_fd_mc, &received_potato, sizeof(received_potato), 0);
             cout << "I'm it" << endl;
             break;
