@@ -1,9 +1,9 @@
 all: ringmaster player
 
-ringmaster: ringmaster.cpp helper.cpp potato.h 
+ringmaster: ringmaster.cpp potato.h 
 	g++ -g -o ringmaster ringmaster.cpp
 
-player: player.cpp potato.h helper.cpp
+player: player.cpp potato.h
 	g++ -g -o player player.cpp
 
 .PHONY:

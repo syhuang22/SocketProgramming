@@ -13,7 +13,7 @@
 #include <algorithm>
 
 #include "potato.h"
-#include "helper.hpp"
+
 
 using namespace std;
 
@@ -187,7 +187,7 @@ int main(int argc, char * argv[]) {
       }
     }
   }
-  
+
   for (int i = 0; i < num_players; i++) {
     close(player_socket_fd[i]);
   }
