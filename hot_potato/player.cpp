@@ -190,13 +190,17 @@ int main(int argc, char * argv[]) {
             exit(1);
         }
         if (FD_ISSET(socket_fd_mc, &readfds)) {
+            std::lock_guard<std::mutex> guard(output_mutex);
             recv(socket_fd_mc, &received_potato, sizeof(received_potato), 0);
             if(!received_potato.isFirstPass) {
                 break;
             }
+            //cout << "from ringmaster" <<endl;
         } else if (FD_ISSET(socket_fd_pc, &readfds)) { 
+            std::lock_guard<std::mutex> guard(output_mutex);
             recv(socket_fd_pc, &received_potato, sizeof(received_potato), 0);
         } else if (FD_ISSET(socket_fd_client_ps, &readfds)) {
+            std::lock_guard<std::mutex> guard(output_mutex);
             recv(socket_fd_client_ps, &received_potato, sizeof(received_potato), 0);
         }
         //cout << "Player: " << id << " I've received the potato with hops: " << received_potato.hops << endl;
