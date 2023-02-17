@@ -10,6 +10,7 @@
 #include <string>
 #include <cstring>
 #include <arpa/inet.h>
+#include <algorithm>
 
 #include "potato.h"
 #include "helper.hpp"
@@ -62,7 +63,7 @@ int main(int argc, char * argv[]) {
   }
 
   //create socket for ringmaster server
-  cout << "server socket created!!!!!!" << endl;
+  //cout << "server socket created!!!!!!" << endl;
   socket_fd = socket(host_info_list->ai_family, 
 	host_info_list->ai_socktype, 
 	host_info_list->ai_protocol);
@@ -73,7 +74,7 @@ int main(int argc, char * argv[]) {
   }
 
   //bind socket
-  cout << "server socket binded" << endl;
+  //cout << "server socket binded" << endl;
   int yes = 1;
   status = setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
   status = bind(socket_fd, host_info_list->ai_addr, host_info_list->ai_addrlen);
@@ -84,7 +85,7 @@ int main(int argc, char * argv[]) {
   } 
 
   //listen mode
-  cout << "server socket listened" << endl;
+  //cout << "server socket listened" << endl;
   status = listen(socket_fd, num_players);
   if (status == -1) {
       cerr << "Error: cannot listen on socket" << endl; 
@@ -134,8 +135,8 @@ int main(int argc, char * argv[]) {
     send(player_socket_fd[i], &ip_length, sizeof(int), 0);
     send(player_socket_fd[i], &player_port[neighbor_id], sizeof(int), 0);
     send(player_socket_fd[i], player_ip[neighbor_id].c_str(), player_ip[neighbor_id].length() + 1, 0);
-    cout << "master send player port : " << player_port[i] << endl;
-    cout << "master send player ip : " << player_ip[i] << endl;
+    //cout << "master send player port : " << player_port[i] << endl;
+    //cout << "master send player ip : " << player_ip[i] << endl;
   } 
 
   //create potato object
@@ -145,14 +146,51 @@ int main(int argc, char * argv[]) {
   //select a random player to start the game 
   srand((unsigned int)time(NULL) + num_players);
   int random_num = rand() % num_players;
-  cout << "Ready to start the game, sending potato to player: " << random_num << endl;
-  cout << "hops of potato: " << potato.hops <<endl;
+  cout << "Ready to start the game, sending potato to player " << random_num << endl;
+  //cout << "hops of potato: " << potato.hops <<endl;
   int bytes_sent = send(player_socket_fd[random_num], &potato, sizeof(potato), 0);
-  cout << "here"<<endl;
+  //cout << "here"<<endl;
 
+  bool should_exit = false;
+  while (!should_exit) {
+    Potato received_potato;
+    fd_set readfds;
+    FD_ZERO(&readfds);
+    for(int i = 0; i < num_players; i++) {
+      FD_SET(player_socket_fd[i], &readfds);
+    }
+    int max_fd = *std::max_element(player_socket_fd, player_socket_fd + num_players) + 1;
+    int result = select(max_fd, &readfds, NULL, NULL, NULL);
+    if (result == -1) {
+      perror("select error");
+      exit(1);
+    }
 
-
-  while(1){
-    
+    for (int i = 0; i < num_players; i++) {
+      if (FD_ISSET(player_socket_fd[i], &readfds)) {
+        int bytes_received = recv(player_socket_fd[i], &received_potato, sizeof(received_potato), 0);
+        if (bytes_received == -1) {
+          perror("recv error");
+          exit(1);
+        }
+        cout<< "Trace of potato:" <<endl;
+        for(int i = 0; i < num_hops; i++) {
+          cout << received_potato.trace[i];
+          if (i != num_hops - 1) {
+            cout << ",";
+          } else {
+            cout << endl;
+          }
+        }
+        should_exit = true;
+        break;
+      }
+    }
   }
+
+  for (int i = 0; i < num_players; i++) {
+    close(player_socket_fd[i]);
+  }
+  close(socket_fd);
+  return 0;
 }

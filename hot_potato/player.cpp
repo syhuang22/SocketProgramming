@@ -88,7 +88,7 @@ int main(int argc, char * argv[]) {
     }
 
     //create socket for player server (PS)
-    cout << "player server socket created!!!!!!" << endl;
+    //cout << "player server socket created!!!!!!" << endl;
     socket_fd_ps = socket(host_info_list_ps->ai_family, 
 	    host_info_list_ps->ai_socktype, 
 	    host_info_list_ps->ai_protocol);
@@ -99,7 +99,7 @@ int main(int argc, char * argv[]) {
     }
 
     //bind socket (PS)
-    cout << "player server socket binded" << endl;
+    //cout << "player server socket binded" << endl;
     int yes = 1;
     status_ps = setsockopt(socket_fd_ps, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
     status_ps = bind(socket_fd_ps, host_info_list_ps->ai_addr, host_info_list_ps->ai_addrlen);
@@ -121,7 +121,7 @@ int main(int argc, char * argv[]) {
        
 
     //listen mode (PS)
-    cout << "player server socket listened" << endl;
+    //cout << "player server socket listened" << endl;
     status_ps = listen(socket_fd_ps, num_players);
     if (status_ps == -1) {
         cerr << "Error: cannot listen on socket" << endl; 
@@ -143,8 +143,8 @@ int main(int argc, char * argv[]) {
     const char * port_num_pc = neighbor_port_str.c_str();
     const char * hostname_pc = neighbor_ip;
 
-    cout << "neighbor's hostname: " << hostname_pc << endl;
-    cout << "neighbor's port number: " << port_num_pc << endl;
+    //cout << "neighbor's hostname: " << hostname_pc << endl;
+    //cout << "neighbor's port number: " << port_num_pc << endl;
 
     
     //create and connect to right player as a client (PC)****************
@@ -195,7 +195,8 @@ int main(int argc, char * argv[]) {
         return -1;
     } 
 
-    cout << "players connection success!"  << endl;
+    //cout << "players connection success!"  << endl;
+
     //start playing the game of potato
     //initialize sockets descriptors set 
 
@@ -210,11 +211,6 @@ int main(int argc, char * argv[]) {
     // cout << "Player: " <<id<< "hop value: " << received_potato.hops<<endl;
     // process the game for potato passing 
     
-    // int test = 5;
-    // send(socket_fd_pc, &test, sizeof(test),0);
-    // int res;
-    // recv(socket_fd_client_ps, &res, sizeof(res),0);
-    // cout<< "neightbor test: " <<res << endl;
     Potato received_potato;
     while (true) {
         fd_set readfds;
@@ -239,39 +235,38 @@ int main(int argc, char * argv[]) {
             cout << "potato from left neighbor" <<endl;
             recv(socket_fd_client_ps, &received_potato, sizeof(received_potato), 0);
         }
-        cout << "Player: " << id << " I've received the potato with hops: " << received_potato.hops << endl;
+        //cout << "Player: " << id << " I've received the potato with hops: " << received_potato.hops << endl;
         received_potato.hops--;
         received_potato.trace[received_potato.index] = id;
         received_potato.index++;
+        cout << "hops left: " << received_potato.hops << endl;
         if (received_potato.hops > 0) { // pass to one of the neighbors 
             // Pass the potato to a neighbor
             srand((unsigned int)time(NULL) + 2);
             int random_neighbor = rand() % 2; // randomly select a neighbor
-            cout << "hops left: " << received_potato.hops << endl;
-            cout << "trace: ";
-            for(int i  = 0 ; i < received_potato.index; i++) {
-                cout << received_potato.trace[i] << " ";
-            }
             cout <<endl;
             if (random_neighbor == 0) {
                 // Pass the potato to the left neighbor
                 send(socket_fd_client_ps, &received_potato, sizeof(received_potato), 0);
-                cout << "Player: " <<id<< " Passing potato to the left neighbor." << endl;
+                int lef_id = (id + num_players - 1) % num_players;
+                cout << "Player: " <<id<< "Sending potato to "<< lef_id << endl;
             } else {
                 // Pass the potato to the right neighbor
                 send(socket_fd_pc, &received_potato, sizeof(received_potato), 0);
-                cout << "Player: " <<id<< " Passing potato to the right neighbor." << endl;
+                int right_id = (id + 1) % num_players;
+                cout << "Player: " <<id<< " Sending potato to "<< right_id << endl;
             }
         } else { //pass potato back to ringmaster
             send(socket_fd_mc, &received_potato, sizeof(received_potato), 0);
-            cout << "Player: " << id << " hops reached zero" << endl;
+            cout << "I'm it" << endl;
             break;
         }
     }
     
-    // close(socket_fd_mc);
-    while(1){
-
-    }
+    //close sockets
+    close(socket_fd_mc);
+    close(socket_fd_pc);
+    close(socket_fd_client_ps);
+    
     return 1;
 }
