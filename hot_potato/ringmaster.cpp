@@ -153,7 +153,6 @@ int main(int argc, char * argv[]) {
 
   bool should_exit = false;
   while (!should_exit) {
-    Potato received_potato;
     fd_set readfds;
     FD_ZERO(&readfds);
     for(int i = 0; i < num_players; i++) {
@@ -168,6 +167,7 @@ int main(int argc, char * argv[]) {
 
     for (int i = 0; i < num_players; i++) {
       if (FD_ISSET(player_socket_fd[i], &readfds)) {
+        Potato received_potato;
         int bytes_received = recv(player_socket_fd[i], &received_potato, sizeof(received_potato), 0);
         if (bytes_received == -1) {
           perror("recv error");
@@ -187,10 +187,11 @@ int main(int argc, char * argv[]) {
       }
     }
   }
-
+  
   for (int i = 0; i < num_players; i++) {
     close(player_socket_fd[i]);
   }
+  freeaddrinfo(host_info_list);
   close(socket_fd);
   return 0;
 }
