@@ -192,16 +192,20 @@ int main(int argc, char * argv[]) {
             cout << endl;
           }
         }
+        received_potato.hops == -1;
+        for (int i = 0; i < num_players; i++) {
+          send(player_socket_fd[0], &received_potato, sizeof(potato), 0);
+        }
         should_exit = true;
         break;
       }
     }
   }
 
-  for (int i = 0; i < num_players; i++) {
-    close(player_socket_fd[i]);
-  }
-  freeaddrinfo(host_info_list);
-  close(socket_fd);
+  // for (int i = 0; i < num_players; i++) {
+  //   close(player_socket_fd[i]);
+  // }
+  // freeaddrinfo(host_info_list);
+  // close(socket_fd);
   return 0;
 }
