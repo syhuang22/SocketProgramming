@@ -143,6 +143,16 @@ int main(int argc, char * argv[]) {
   Potato potato;
   potato.hops = num_hops;
 
+  //case of zero
+  if(num_hops == 0) {
+    for (int i = 0; i < num_players; i++) {
+      close(player_socket_fd[i]);
+    }
+    freeaddrinfo(host_info_list);
+    close(socket_fd);
+    return 0;
+  }
+
   //select a random player to start the game 
   srand((unsigned int)time(NULL) + num_players);
   int random_num = rand() % num_players;
