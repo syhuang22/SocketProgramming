@@ -12,9 +12,9 @@ the potato around. Thus, each player process has a left neighbor and a right nei
 there will be a “ringmaster” process that will start each game, report the results, and shut down
 the game. <br><br>
 
-The server program is invoked as:
-'ringmaster <port_num> <num_players> <num_hops>'
+The server program is invoked as: <br>
+`ringmaster <port_num> <num_players> <num_hops>`<br>
 (example: ./ringmaster 1234 3 100)
-The player program is invoked as:
-'player <machine_name> <port_num>'
+The player program is invoked as: <br>
+`player <machine_name> <port_num>`<br>
 (example: ./player vcm-xxxx.vm.duke.edu 1234)
