@@ -10,11 +10,11 @@ and the player holding the potato is “it”. The object is to not be the one h
 end of the game. In this assignment, you will create a ring of “player” processes that will pass
 the potato around. Thus, each player process has a left neighbor and a right neighbor. Also,
 there will be a “ringmaster” process that will start each game, report the results, and shut down
-the game. <br><br>
+the game. <br>
 
 The server program is invoked as: <br>
 `ringmaster <port_num> <num_players> <num_hops>`<br>
-(example: ./ringmaster 1234 3 100)
+(example: ./ringmaster 1234 3 100)<br>
 The player program is invoked as: <br>
 `player <machine_name> <port_num>`<br>
 (example: ./player vcm-xxxx.vm.duke.edu 1234)
