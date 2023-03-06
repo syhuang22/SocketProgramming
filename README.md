@@ -14,7 +14,7 @@ the game. <br>
 
 The server program is invoked as: <br>
 `ringmaster <port_num> <num_players> <num_hops>`<br>
-(example: ./ringmaster 1234 3 100)<br>
-The player program is invoked as: <br><br>
+(example: ./ringmaster 1234 3 100)<br><br>
+The player program is invoked as: <br>
 `player <machine_name> <port_num>`<br>
 (example: ./player vcm-xxxx.vm.duke.edu 1234)
